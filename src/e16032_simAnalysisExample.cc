@@ -2086,7 +2086,7 @@ void e16032_simAnalysisExample::EndOfEventAction(const G4Event *evt)
 
 
   //BC - hits in CeBr3 scintillator
-  {
+  if(DHCCeBr3Scint) {
     
     int n_hit = DHCEXOtest->entries();
     
