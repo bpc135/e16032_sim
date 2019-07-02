@@ -688,7 +688,7 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
     G4double theta = 0;
     //G4double radius = fsegacryooutrad + 8.65*cm;//SLD
     //G4double radius = 13.19*cm;//keep centers constant regardless of how I change SeGA internal details
-    G4double radius = 13.19*cm - 0.5*cm;//new pipe thickness reduced by this
+    G4double radius = 13.19*cm - 0.05*cm;//new pipe thickness reduced by this
     //G4double radius = fsegacryooutrad + 8.84*cm; // stand drawing
     //G4double radius = fsegacryooutrad + 9.0*cm; //update based on Chris picture 2/20/13
     //G4double radius = fsegacryooutrad + 7.8*cm; // for BCS mode
@@ -1320,7 +1320,7 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   //flabr3framelength = 11.684*cm;    //4.6 inches
   flabr3framelength = 10.95375*cm;    //4.3125 inches
   //flabr3frameinrad = 15.24*cm;      //6 inches
-  flabr3frameinrad = 15.24*cm - 0.5*cm;
+  flabr3frameinrad = 15.24*cm - 0.05*cm;
   flabr3frameoutrad = flabr3frameinrad + flabr3framethick;
   
   solidLaBr3Frame = new G4Tubs("LaBr3Frame",flabr3frameinrad,flabr3frameoutrad,flabr3framelength/2.,0.,twopi);
