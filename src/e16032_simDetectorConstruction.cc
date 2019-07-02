@@ -687,7 +687,8 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
     G4double dtheta = twopi/nsega;
     G4double theta = 0;
     //G4double radius = fsegacryooutrad + 8.65*cm;//SLD
-    G4double radius = 13.19*cm;//keep centers constant regardless of how I change SeGA internal details
+    //G4double radius = 13.19*cm;//keep centers constant regardless of how I change SeGA internal details
+    G4double radius = 13.19*cm - 0.5*cm;//new pipe thickness reduced by this
     //G4double radius = fsegacryooutrad + 8.84*cm; // stand drawing
     //G4double radius = fsegacryooutrad + 9.0*cm; //update based on Chris picture 2/20/13
     //G4double radius = fsegacryooutrad + 7.8*cm; // for BCS mode
@@ -1084,15 +1085,17 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   
   //BC - create beam pipe used for LaBr3 array
   
-  //Al beam pipe:  4.5 inch outer diameter (radius = 5.715 cm), 0.125 inch thickness (0.3175 cm)
+  //TO Al beam pipe: 0.19375 cm thickness; 5.63675 cm outer radius
 
   //fPipeOutRad = 5.715*cm;
-  fPipeOutRad = 5.7975*cm;
+  //fPipeOutRad = 5.7975*cm; //previous simulation
+  fPipeOutRad = 5.793*cm;
   //fPipeOutRad = 5.87375*cm;
   //fPipeOutRad = 6.0325*cm;
   //fPipeOutRad = 6.19125*cm;
   //fPipeOutRad = 6.35*cm;
-  fPipeInRad = 5.3975*cm;
+  //fPipeInRad = 5.3975*cm; //previous simulation
+  fPipeInRad = 5.443*cm;
   fPipeLength = 50.8*cm;
   //fPipeLength = 39.6875*cm;
 
@@ -1316,7 +1319,8 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   flabr3framethick = 1.27*cm;       //0.5 inches
   //flabr3framelength = 11.684*cm;    //4.6 inches
   flabr3framelength = 10.95375*cm;    //4.3125 inches
-  flabr3frameinrad = 15.24*cm;      //6 inches
+  //flabr3frameinrad = 15.24*cm;      //6 inches
+  flabr3frameinrad = 15.24*cm - 0.5*cm;
   flabr3frameoutrad = flabr3frameinrad + flabr3framethick;
   
   solidLaBr3Frame = new G4Tubs("LaBr3Frame",flabr3frameinrad,flabr3frameoutrad,flabr3framelength/2.,0.,twopi);
@@ -2036,7 +2040,7 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   
   //fCeBr3Scint_zpos = -2.278125*cm;
   //fCeBr3Scint_zpos = -2.02*cm;
-  fCeBr3Scint_zpos = -2.25*cm + (fCeBr3ScintDepth -3*mm)/2.0;
+  fCeBr3Scint_zpos = -2.15*cm + (fCeBr3ScintDepth -3*mm)/2.0;
   G4cout << "fCeBr3Scint_zpos = " << fCeBr3Scint_zpos << G4endl;
   //fCeBr3Scint_zpos += 0.02*cm;
   //fCeBr3Scint_zpos = -2.0*cm;
@@ -2074,9 +2078,9 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   logicPSPMT = new G4LogicalVolume(solidPSPMT,PSPMT_Mater,"PSPMT",0,0,0);  
   
   //fPSPMT_zpos = fEJ204Scint_zpos + fEJ204ScintDepth/2.0 + fPSPMTDepth/2.0 + fPSPMTWindowDepth + fPSPMTCathodeDepth;
-  fPSPMT_zpos = fCeBr3Scint_zpos + fCeBr3ScintDepth/2.0 + fPSPMTDepth/2.0 + fPSPMTWindowDepth + fPSPMTCathodeDepth;
-  fPSPMTWindow_zpos = fPSPMT_zpos - fPSPMTDepth/2.0 - fPSPMTCathodeDepth - fPSPMTWindowDepth/2.0;
-  fPSPMTCathode_zpos = fPSPMT_zpos - fPSPMTDepth/2.0 - fPSPMTCathodeDepth/2.0;
+  fPSPMT_zpos = fCeBr3Scint_zpos - fCeBr3ScintDepth/2.0 - fPSPMTDepth/2.0 - fPSPMTWindowDepth - fPSPMTCathodeDepth;
+  fPSPMTWindow_zpos = fPSPMT_zpos + fPSPMTDepth/2.0 + fPSPMTCathodeDepth + fPSPMTWindowDepth/2.0;
+  fPSPMTCathode_zpos = fPSPMT_zpos + fPSPMTDepth/2.0 + fPSPMTCathodeDepth/2.0;
   //making PSPMT window and cathode children of the mother volume PSPMT
   // fPSPMTWindow_zpos = -fPSPMTDepth/2.0 - fPSPMTCathodeDepth - fPSPMTWindowDepth/2.0;
   // fPSPMTCathode_zpos = -fPSPMTDepth/2.0 - fPSPMTCathodeDepth/2.0;
