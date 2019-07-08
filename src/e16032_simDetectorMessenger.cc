@@ -300,7 +300,7 @@ else if (command == UsePSPMTCathodeCmd )
   else if (command == UsePipeCmd )
     { myDetector->setUsePipe(UsePipeCmd->GetNewBoolValue(newValue));}
      else if (command == UseCeBr3ScintCmd )
-    { myDetector->setUseCeBr3Scint(UseCeBr3ScintCmd->GetNewBoolValue(newValue));}
+       { myDetector->setUseCeBr3Scint(UseCeBr3ScintCmd->GetNewBoolValue(newValue));}   //TO
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
