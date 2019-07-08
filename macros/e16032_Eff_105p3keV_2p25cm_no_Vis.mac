@@ -1,0 +1,112 @@
+###############################################################################
+#                                                                         #
+# THIS TEST GENERATES NUCLEI OF ***F-24*** AT THE CENTRE OF THE TARGET 
+# WHICH IS THE ORIGIN. 
+#  
+################################################################################
+
+#filename
+
+#/gedssd_bc/analysis/dirname 
+/e16032_sim/analysis/filename /data/e16032/tho14/simulations/analysis/e16032_Eff_105keV_2p25cm
+
+#Physics lists
+
+#/gedssd_bc/phys/SelectPhysics LowEnergy_EM_Livermore
+#/gedssd_bc/phys/SelectPhysics LowEnergy_EM
+#/gedssd_bc/phys/SelectPhysics Standard_EM
+
+#Pick the detectors to visualize
+
+#
+#uncommonly used detectors - set to false unless you need 
+#something specific here
+/e16032_sim/det/Use3Hen false
+/e16032_sim/det/UseMTC false
+/e16032_sim/det/UseLENDA false
+/e16032_sim/det/UseGetest false
+/e16032_sim/det/UseEXOtest false
+
+#more commonly used detectors in beta decay setups
+/e16032_sim/det/UseSiDSSD false
+/e16032_sim/det/setGeThickDetectorThickness 15 mm
+/e16032_sim/det/setGeThinDetectorMate Vacuum
+/e16032_sim/det/UseGeThickDetector false
+/e16032_sim/det/UseGeThickDetectorCryo false
+/e16032_sim/det/UseGeThickDetectorCryoEndCap false
+/e16032_sim/det/UseGeThinDetector false
+/e16032_sim/det/UseSega true
+/e16032_sim/det/UseClover false
+/e16032_sim/det/UseLaBr3 true
+/e16032_sim/det/UseEJ204Scint false
+/e16032_sim/det/UseCeBr3Scint true
+/e16032_sim/det/UsePipe true
+/e16032_sim/det/UsePSPMT false
+/e16032_sim/det/UseLaBr3Frame true
+
+#initialize
+
+/run/initialize
+#/run/setCutForRegion GeThickDetector 0.010 mm
+
+#open with OpenGL
+
+#/vis/open OGL 1050x1050-0+0
+#/vis/open OGLSX 900x900-0+0
+
+# Disable auto refresh and quieten vis messages whilst scene and
+# trajectories are established:
+#/vis/viewer/set/autoRefresh false
+#/vis/verbose errors
+
+
+#draw the volume
+
+#/vis/scene/create
+#/vis/open HepRepFile
+#/vis/drawVolume
+
+#trajectory stuff
+
+#/vis/scene/add/trajectories
+#/vis/viewer/flush
+
+#add coordinate axes
+
+#/vis/scene/add/axes 0 0 0 0.3 m
+
+#/vis/viewer/set/style surface
+#/vis/viewer/set/style wireframe
+#/vis/viewer/set/hiddenEdge 1
+
+#/vis/scene/add/trajectories
+#/vis/scene/add/hits
+
+#/vis/scene/endOfEventAction accumulate
+#/vis/viewer/set/autoRefresh true
+#/vis/verbose warnings
+
+/grdm/allVolumes
+
+#source
+
+#/gps/position 0.3 0 6.85 cm
+#/gps/position 0.65 0.4 7.30 cm
+/gps/ang/type iso
+/gps/position 0 0 -2.25 cm
+#/gps/energy 123.1 keV
+/gps/particle gamma
+#/gps/ion 63 155 0 0
+/gps/energy 105.3 keV
+/gps/particle gamma
+#ion 
+#/gps/ion 28 90 0  0
+#
+
+
+
+/run/beamOn 1000000
+
+# Re-establish auto refreshing and verbosity:
+#/vis/viewer/set/autoRefresh true
+#/vis/verbose warnings
