@@ -1089,7 +1089,7 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
 
   //fPipeOutRad = 5.715*cm;
   //fPipeOutRad = 5.7975*cm; //previous simulation
-  fPipeOutRad = 5.793*cm;
+  fPipeOutRad = 5.793*cm;//for pipe thickness of 0.35cm
   //fPipeOutRad = 5.87375*cm;
   //fPipeOutRad = 6.0325*cm;
   //fPipeOutRad = 6.19125*cm;
