@@ -82,6 +82,7 @@ class e16032_simDetectorMessenger: public G4UImessenger
     G4UIcmdWithABool*          UsePSPMTWindowCmd;//BC - PSPMT e14057 + e16032
     G4UIcmdWithABool*          UseSiDSSDCmd;//BC - SiDSSD e14057
     G4UIcmdWithABool*          UsePipeCmd;//BC - Beam Pipe e14057 + e16032
+    G4UIcmdWithABool*          UsePipe2Cmd;//TO - Additional Beam Pipe 
     G4UIcmdWithABool*          UseCeBr3ScintCmd;//BC - CeBr3 Scint e16032
     
 };

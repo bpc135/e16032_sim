@@ -71,7 +71,18 @@ class e16032_simDetectorConstruction : public G4VUserDetectorConstruction
   // get thin ge detector parameters
      G4double GetGeThinDetectorThickness() {return fGeThinDetectorThickness;};
      G4double GetGeThinDetectorRadius()  {return fGeThinDetectorRadius;};
-     
+
+
+  //TO CeBr3 Boolean Values and Parameters for Analysis Example
+  G4double GetCeBr3ScintDepth() {return fCeBr3ScintDepth;};
+  G4double GetCeBr3ScintHeight() {return fCeBr3ScintHeight;};
+  G4double GetCeBr3ScintWidth() {return fCeBr3ScintWidth;};
+  
+  G4bool GetUseCeBr3Scint() {return fUseCeBr3Scint;};
+  G4ThreeVector GetCeBr3ScintPos() {return fCeBr3ScintPos;};
+
+
+  
   // get the boolean values to determine which detector(s) is being used
      G4bool GetUseGeThickDetector() {return fUseGeThickDetector;};
      G4bool GetUseGeThinDetector() {return fUseGeThinDetector;};
@@ -148,6 +159,9 @@ class e16032_simDetectorConstruction : public G4VUserDetectorConstruction
   // BC - set whether or not beam pipe will be used (e14057 + e16032)
      void setUsePipe( G4bool value) {fUsePipe = value;};
 
+  // TO - Add Ge pipe
+     void setUsePipe2( G4bool value) {fUsePipe2 = value;};
+  
   // BC - set whether or not CeBr3 scintillator will be used (e16032)
      void setUseCeBr3Scint( G4bool value) {fUseCeBr3Scint = value;};
   
@@ -210,6 +224,11 @@ class e16032_simDetectorConstruction : public G4VUserDetectorConstruction
      G4LogicalVolume*   logicSegaDLinner;         // pointer to the logical Sega crystal
      G4VPhysicalVolume* physiSegaDLinner;         // pointer to the physical Sega crystal
 
+  //TO
+  G4Tubs*            solidSegaDLouter;         // pointer to the solid outer dead layer of SeGA
+  G4LogicalVolume*   logicSegaDLouter;         // pointer to the logical outer dead layer
+  G4VPhysicalVolume* physiSegaDLouter;         // pointer to the physical Sega outer dead layer
+
      G4Tubs*            solidSegaCentralCon;      // pointer to the solid Sega central contact
      G4LogicalVolume*   logicSegaCentralCon;      // pointer to the logical Sega central contact
      G4VPhysicalVolume* physiSegaCentralCon;      // pointer to the physical Sega central contact
@@ -248,7 +267,12 @@ class e16032_simDetectorConstruction : public G4VUserDetectorConstruction
 
      G4Tubs*            solidBCSpipe;            // pointer to the solid BCSpipe
      G4LogicalVolume*   logicBCSpipe;            // pointer to the logical BCS pipe
-     G4VPhysicalVolume* physiBCSpipe;            // pointer to the physical BCS pipe
+    G4VPhysicalVolume* physiBCSpipe;            // pointer to the physical BCS pipe
+  
+     G4Tubs*            solidBCSpipe2;            // pointer to the solid BCSpipe2
+     G4LogicalVolume*   logicBCSpipe2;            // pointer to the logical BCS pipe2
+      G4VPhysicalVolume* physiBCSpipe2;            // pointer to the physical BCS pipe
+ 
 
      G4Tubs*            solidBCSvac;            // pointer to the solid BCSvac
      G4LogicalVolume*   logicBCSvac;            // pointer to the logical BCS vac
@@ -414,6 +438,9 @@ class e16032_simDetectorConstruction : public G4VUserDetectorConstruction
      G4Material* PSPMTCathode_Mater;              //PSPMT cathode material
      G4Material* SiDSSD_Mater;                    //SiDSSD material
      G4Material* CeBr3Scint_Mater;                //CeBr3 Scintillator material
+
+  //TO
+     G4Material* BCSpipeMater;                //Pipe Material
      
 
      G4double fWorldLength;                       // Full length the world volume
@@ -434,6 +461,11 @@ class e16032_simDetectorConstruction : public G4VUserDetectorConstruction
      G4double fPipeInRad;                         // Inner radius of the e14057 detector pipe
      G4double fPipeLength;                        // Length of the e14057 detector pipe
 
+     //Additional Ge Pipe
+     G4double fPipe2OutRad;                        
+     G4double fPipe2InRad;                        
+     G4double fPipe2Length;                        
+  
      G4double fSpacing;                           //Interdetector spacing
 
      G4bool fUseGeThinDetector;                   //flag to determine if thin detector is used
@@ -455,6 +487,7 @@ class e16032_simDetectorConstruction : public G4VUserDetectorConstruction
      G4bool fUsePSPMTWindow;                            //flag to determine if PSPMT is used
      G4bool fUseSiDSSD;                           //flag to determine if SiDSSD is used
      G4bool fUsePipe;                             //flag to determine if beam pipe is used
+     G4bool fUsePipe2;                             //flag to determine if beam pipe is used
      G4bool fUseCeBr3Scint;                       //flag to determine if CeBr3 Scint is used
 
 
@@ -471,6 +504,8 @@ class e16032_simDetectorConstruction : public G4VUserDetectorConstruction
      G4ThreeVector fSegaCrystalPos;               // location of the crystal inside the vacuum region
      G4ThreeVector fSegaActivePos;                // location of the active area inside the crystal
      G4ThreeVector fSegaDLinnerPos;                  //location of the inner dead layer of sega
+  //TO
+  G4ThreeVector fSegaDLouterPos;                  //location of the outer dead layer of sega
      G4ThreeVector fSegaCentralConPos;            // location of the central contact inside the active area
      G4ThreeVector fPSPMTVacPos;                  // location of the vacuum for the PSPMT (so not a solid block) 
 
@@ -489,6 +524,9 @@ class e16032_simDetectorConstruction : public G4VUserDetectorConstruction
      G4double fsegaactivethick;                   // The thickness of the active area
      G4double fsegaDLinnerthick;                  //thickness of the inner dead layer 
      G4double fsegaDLinnerlength;                 //length of the inner dead layer
+  //TO
+  G4double fsegaDLouterthick;                  //thickness of the outer dead layer 
+  G4double fsegaDLouterlength;                 //length of the outer dead layer
      G4double fsegacentralconlength;              // The length of the central contact
      G4double fsegacentralconthick;               // The thickness of the central contact
      G4double fBCSPlasticlength;                  //width of the BCSplatic bits
@@ -599,6 +637,8 @@ class e16032_simDetectorConstruction : public G4VUserDetectorConstruction
      G4double fCeBr3ScintWidth;                   // width of CeBr3 Scint
      G4double fCeBr3ScintDepth;                   // depth of CeBr3 Scint
      G4double fCeBr3Scint_zpos;
+     //TO I need a vector to properly improt the position info in analysisexample
+     G4ThreeVector fCeBr3ScintPos;           //
      
 
   //G4Region*   targetRegion;

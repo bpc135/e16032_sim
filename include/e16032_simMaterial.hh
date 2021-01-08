@@ -91,6 +91,8 @@ private:
   G4Element* elementNa;
   G4Element* elementK;
   G4Element* elementCe;
+  //TO - add Lead
+  G4Element* elementPb;
 
 
   // Materials
@@ -131,8 +133,9 @@ private:
   //BC - making materials for e14057 PSPMT
   G4Material* Borosilicate;
   G4Material* Bialkali;
-
-
+  //TO - lead for Pipe
+  G4Material* Pb;
+  G4Material* Al2;
 //   std::vector<G4Material*>   Material;
 //   std::vector<G4Element*>    Element;
 //   std::vector<G4Isotope*>    Isotope;

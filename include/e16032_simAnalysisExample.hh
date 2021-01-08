@@ -92,6 +92,8 @@ public:
   // void ResetStartLocation(G4double &, G4double &);
 
   void DetectorInfo(e16032_simDetectorConstruction*);
+  //TO
+  void DetectorInfo2(e16032_simDetectorConstruction*);
   // void DetectorInfo(ExCPDetectorConstruction*);
   
   // G4UserRunAction
@@ -132,6 +134,19 @@ private:
   
   G4int UseGeThickDetector;
   G4int UseGeThinDetector;
+
+  //TO Importing CeBr3 dimensions from Detector Construction
+  G4int UseCeBr3Scint;
+  G4double CeBr3ScintThickness;
+  G4double CeBr3ScintHeight;
+  G4double CeBr3ScintWidth;
+  G4double CeBr3Scintx;
+  G4double CeBr3Scinty;
+  G4double CeBr3Scintz;
+  G4double CeBr3stripwidthx;
+  G4double CeBr3stripwidthy;
+  G4double CeBr3stripwidthz;
+  
 
   G4double GeThickDetectorThickness;
   G4double GeThinDetectorThickness;
@@ -181,11 +196,12 @@ private:
   G4double max_energy_y;
   G4double max_strip_x;
   G4double max_strip_y;
-  
-    G4String volname;
-    G4int volcopyno, e16032_simcopyno;
 
-    G4double e16032_sim_edep, crystal_edep[68];
+
+  G4String volname;
+  G4int volcopyno, e16032_simcopyno;
+
+  G4double e16032_sim_edep, crystal_edep[68];
 
   G4int decaycount;
   G4int decaycount2;
@@ -295,6 +311,8 @@ private:
   TTree *e16032_simtree;
   TTree *e16032_siminfo;
 
+  TTree *e16032_siminfo2;
+
   TStopwatch *timer;
   TStopwatch *eventtimer;
 
@@ -368,7 +386,7 @@ private:
   TH2D *hGammaGamma;
   TH2D *hmultvsmult;
   TH2D *haverageEvsmult;
-
+   
   TH1D *hEnergyDepositStripx;
   TH1D *hEnergyDepositStripy;
 
@@ -418,6 +436,10 @@ private:
   TH1D *hEnergyDepositSega[16];
   TH1D *hSega;
   TH1D *hSegaab;  //Sega addback
+  //TO More Sega stuff
+  TH2D *hSegagg;
+  int numSega;
+  
   TH1D *hEnergyDepositClover[36];
   TH1D *hClover;
   TH1D *hEnergyDepositClover_addback[9];
@@ -439,6 +461,10 @@ private:
   TH1D *hEnergyDepositNoAlgorithmGeDSSDy[40];
   TH1D *hEnergyDepositGeDSSDxy[40][40];
   TH2D *hPixelGamma;
+  //TO Tracking particles that interact with the CeBr3
+  TH2D *hPixelGammaCeBr3;
+  TH2D *hPixelElectronCeBr3;
+  
   TH2D *hPixele;
   TH2D *hPixelFe;
   TH1D *hgammaelectrontime;
@@ -458,6 +484,7 @@ private:
   TH2D *hLaBr3gg;
   int numLaBr3;
   
+  
   //BC - add histograms for Getest
   TH1D *hEnergyDepositGetest;
   TH1D *hGetest;
@@ -471,8 +498,9 @@ private:
   TH1D *hEJ204Scint;
   int numScint;
 
-  //BC - add histograms for CeBR3 Scintillator
-  TH1D *hEnergyDepositCeBr3Scint[257];
+  //TO - add histograms for CeBr3 Scintillator
+  // TH1D *hEnergyDepositCeBr3Pixel[16][16];
+  TH1D *hEnergyDepositCeBr3Scint;
   TH1D *hCeBr3Scint;
   int numScintCeBr3;
 
