@@ -1,4 +1,4 @@
-//
+  //
 // ********************************************************************
 // * License and Disclaimer                                           *
 // *                                                                  *
@@ -107,6 +107,9 @@ e16032_simDetectorConstruction::e16032_simDetectorConstruction()
 
   //BC - Beam Pipe
   fUsePipe = true;
+
+  //TO Additional Concentric pipe (Higher Z)
+  fUsePipe2 = false;
  
   //BC - PSPMT
   //return to true once testing is over
@@ -152,7 +155,7 @@ void e16032_simDetectorConstruction::DefineMaterials()
 
 
   materialsManager = new e16032_simMaterial();
-  // Lead
+  // Lead1.387E-03	4.089E-02	8.717E-03	1.855E-03	0.000E+00	5.285E-02
   //   materialsManager->AddMaterial("Lead","Pb",11.3*g/cm3,"");
   //   //Germanium detector
   //   materialsManager->AddMaterial("Germanium","Ge",5.323*g/cm3,""); 
@@ -201,17 +204,19 @@ void e16032_simDetectorConstruction::DefineMaterials()
   //BC - EJ204 Scintillator material
   EJ204Scint_Mater = materialsManager->GetMaterial("EJ204");
   //BC - PSPMT material... for now just the EJ204 material
-  // PSPMT_Mater = materialsManager->GetMaterial("EJ204");
-  //PSPMT_Mater = materialsManager->GetMaterial("Al");
+  //PSPMT_Mater = materialsManager->GetMaterial("EJ204");
+  //PSPMT_Mater = materialsManager->GetMaterial("Al"); //using Aluminum; might change later to something else with different density
   PSPMT_Mater = materialsManager->GetMaterial("StainlessSteel");  //trying stainless
-  PSPMTWindow_Mater = materialsManager->GetMaterial("Borosilicate glass");
-  PSPMTCathode_Mater = materialsManager->GetMaterial("Bialkali");
+  PSPMTWindow_Mater = materialsManager->GetMaterial("StainlessSteel");
+  PSPMTCathode_Mater = materialsManager->GetMaterial("StainlessSteel");
+
+  //PSPMTWindow_Mater = materialsManager->GetMaterial("Borosilicate glass");
+  //PSPMTCathode_Mater = materialsManager->GetMaterial("Bialkali");
   //BC - SiDSSD just made out of Si
   SiDSSD_Mater = materialsManager->GetMaterial("Si");
   //BC - CeBr3 Scintillator material
   CeBr3Scint_Mater = materialsManager->GetMaterial("CeBr3");
-  
-  
+
 
   //std::cout << "I am in detector construction" < std::endl;
 }
@@ -526,7 +531,7 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   // fsegacryothick  = 0.15*cm;
   //fsegacryooutrad = 4.35*cm;
   //trying to match from Ragnar's sim
-  fsegacryothick =0.10*cm;
+  fsegacryothick =0.32*cm; //0.10cm prev e16032 sim TO; now matching gamma group
   fsegacryooutrad = 4.325*cm;
 
   //fsegacryooutrad = 4.385*cm;//to accomodate increased crystal thickness
@@ -580,7 +585,7 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
 
   // fsegavac1length = 8.0*cm; //initial value
   fsegavac1length = fsegadetcuplength - fsegadetcupthick;
-  fsegavac1thick = 0.152*cm;//initial value
+  fsegavac1thick = 0.152*cm;//initial value//TO prev 0.152cm
 
 
   //fsegavac1thick = 0.125*cm;//adjust for thicker cup by making this thinner
@@ -598,14 +603,16 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
 				    false,
 				    0);
 
+  
+  
+  //TO Crystal - previously thin Ge layer of 0.01cm thickness before active area; now repurposed as an outer DL
   //  fsegacrystallength = 8.0*cm; //initial value
   fsegacrystallength = fsegavac1length-fsegavac1thick;
+  //fsegacrystallength = fsegaDLouterlength - fsegaDLouterthick;
   // fsegacrystalthick = 0.1*cm;//initial value
   //fsegacrystalthick = 0.06*cm;
   // fsegacrystalthick = 0.03*cm;//like Ragnar's sim  //original in nrl sim
-  fsegacrystalthick = 0.01*cm;
-  
-  //  fsegacrystalthick = 0.09*cm; //try thicker 
+  fsegacrystalthick = 0.0195*cm; //e16032_final 0.0195cm
   foutrad = foutrad - fsegavac1thick;
   G4cout << " radius4 " << foutrad << G4endl;
   fSegaCrystalPos = G4ThreeVector(0,0,-(fsegavac1length/2. - fsegacrystallength/2.));
@@ -618,13 +625,14 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
 				       logicSegaVac1,
 				       false,
 				       0);
-
+  
   // fsegaactivelength = 7.9*cm; //initial value
   fsegaactivelength = fsegacrystallength - fsegacrystalthick;
+  //fsegaactivelength = fsegaDLouterlength - fsegaDLouterthick;
   // fsegaactivethick =3.0*cm-fsegacrystalthick-0.2*cm;//0.4 accounts for additional dead layer
   // fsegaactivethick = 2.9*cm;//to match crystal dimensions in Mueller01
   //fsegaactivethick = 2.5*cm;
-  fsegaactivethick = 2.865*cm;//initial values
+  fsegaactivethick = 3.185*cm;//TO 2.865 used for tentative e16032//3.185 at 5/6/20
   //fsegaactivethick = 2.75*cm;
 
   
@@ -634,39 +642,44 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   solidSegaActiveArea = new G4Tubs("SegaActiveArea",0,foutrad,fsegaactivelength/2.,0.,twopi);
   logicSegaActiveArea = new G4LogicalVolume(solidSegaActiveArea,SegaMater,"SegaActiveArea",0,0,0);
   physiSegaActiveArea = new G4PVPlacement(0,
-					  fSegaActivePos,
-					  logicSegaActiveArea,
-					  "SegaActiveArea",
-					  logicSegaCrystal,
-					  false,
-					  0);
+  					  fSegaActivePos,
+  					  logicSegaActiveArea,
+  					  "SegaActiveArea",
+  					  logicSegaCrystal,
+  					  false,
+  					  0);
 
-  //adding a second dead layer like Ragnar
-  fsegaDLinnerlength = 0.875*fsegacrystallength;//just make it around central contact
-  //  fsegaDLinnerlength = 7.0*cm;//just make it around central contact original value
+  //Inner Dead Layer
   //fsegaDLinnerthick = 0.2*cm;//like Ragnar's sim
-  fsegaDLinnerthick = 0.175*cm;
-  // fsegaDLinnerthick = 0.5*cm;
+  fsegaDLinnerlength = 0.875*fsegacrystallength;//just make it around central contact
+  fsegaDLinnerthick = 0.08*cm;//Testing - Original value 0.175cm//0.08 at 5/6/20
+  //fsegaDLinnerthick = 0.5*cm;
 
   foutrad = foutrad - fsegaactivethick;
-  G4cout << " radius5 " << foutrad << G4endl;
+  G4cout << " radius6 " << foutrad << G4endl;
+  //G4cout << " radius7 " << foutrad << G4endl;
   fSegaDLinnerPos = G4ThreeVector(0,0,-(fsegaactivelength/2. - fsegaDLinnerlength/2.));
   solidSegaDLinner = new G4Tubs("SegaInnerDeadLayer",0,foutrad,fsegaDLinnerlength/2.,0.,twopi);
-  logicSegaDLinner = new G4LogicalVolume(solidSegaDLinner,SegaMater,"SegaCrystal",0,0,0);
+  logicSegaDLinner = new G4LogicalVolume(solidSegaDLinner,SegaMater,"SegaInnerDeadLayer",0,0,0);
   physiSegaDLinner = new G4PVPlacement(0,
-				       fSegaDLinnerPos,
-				       logicSegaDLinner,
-				       "SegaInnerDeadLayer",
-				       logicSegaActiveArea,
-				       false,
-				       0);
- 
+  				       fSegaDLinnerPos,
+  				       logicSegaDLinner,
+  				       "SegaInnerDeadLayer",
+  				       logicSegaActiveArea,
+  				       false,
+  				       0);
+
+
+  
   // fsegacentralconlength = 7.0*cm; //initial value
   fsegacentralconlength = fsegaDLinnerlength - fsegaDLinnerthick;
-  fsegacentralconthick = 0.5*cm;
-  // foutrad = foutrad - fsegaactivethick;
+  //fsegacentralconlength = fsegaactivelength - fsegaactivethick;
+  //fsegacentralconthick = 0.5*cm; //TO Initial thickness
+  fsegacentralconthick = 0.1*cm;
+  //foutrad = foutrad - fsegaactivethick;
   foutrad = foutrad -fsegaDLinnerthick;//changes with addition of new dead layer
-  G4cout << " radius6 " << foutrad << G4endl;
+  G4cout << " radius7 " << foutrad << G4endl;
+  //G4cout << " radius8 " << foutrad << G4endl;
   //fSegaCentralConPos = G4ThreeVector(0,0,-(fsegaactivelength/2. - fsegacentralconlength/2.));
   fSegaCentralConPos = G4ThreeVector(0,0,-(fsegaDLinnerlength/2. - fsegacentralconlength/2.));//changes with addition of new dead layer
   solidSegaCentralCon = new G4Tubs("SegaCentralCon",0,foutrad,fsegacentralconlength/2.,0.,twopi);
@@ -675,8 +688,8 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
 					  fSegaCentralConPos,
 					  logicSegaCentralCon,
 					  "SegaCentralCon",
-					  //  logicSegaActiveArea,
-					  logicSegaDLinner,//also changes with addition of new dead layer
+					  //logicSegaActiveArea,
+					  logicSegaDLinner,
 					  false,
 					  0);
 
@@ -688,7 +701,7 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
     G4double theta = 0;
     //G4double radius = fsegacryooutrad + 8.65*cm;//SLD
     //G4double radius = 13.19*cm;//keep centers constant regardless of how I change SeGA internal details
-    G4double radius = 13.19*cm - 0.05*cm;//new pipe thickness reduced by this
+    G4double radius = 12.9*cm;//e14057
     //G4double radius = fsegacryooutrad + 8.84*cm; // stand drawing
     //G4double radius = fsegacryooutrad + 9.0*cm; //update based on Chris picture 2/20/13
     //G4double radius = fsegacryooutrad + 7.8*cm; // for BCS mode
@@ -706,8 +719,8 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
       //  G4double fSegazpos =fsegacryolength/2.+ 0.60*cm; //try to match the runs from the end of e14057,e14039 campaign
 
       //  G4double fSegazpos =fsegacryolength/2.+ 3.25*cm; //try to match the runs from the end of e14057,e14039 campaign THIS ONE WORKS!!
-      G4double fSegazpos = 9.8*cm;  //e14057
-      //G4double fSegazpos = 10.7*cm;  //e14039
+      //G4double fSegazpos = 9.8*cm;  //back to e14057 specs
+      G4double fSegazpos = 10.53*cm;  //e14039
 
       //add spacers in downstream ring - e14057
       //while we did add spacers in, the simulation makes it seem like the effect was to put them in 
@@ -738,7 +751,8 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
     for(G4int n=nsega; n < nsega+nsega; n++){
       
       //theta = dtheta * (0.5+n-nsega);
-      theta = pi/2.0 + dtheta * (0.5+n-nsega);
+      //theta = pi/2.0 - dtheta * (0.5+n-nsega);//modified to match numbering convention for experiment
+      theta = pi/2.0 + dtheta * (0.5+n-nsega);//modified to match numbering convention for experiment
       G4double fSegaxpos = radius*cos(theta);
       G4double fSegaypos = radius*sin(theta); 
       //   G4double fSegazpos =-fsegacryolength/2.- 0.25*cm; //try to match the service descrip
@@ -748,8 +762,10 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
       // G4double fSegazpos =-fsegacryolength/2.- 0.60*cm; //try to match the runs from the end of e14057,e14039 campaign
 
       // G4double fSegazpos =-fsegacryolength/2.- 3.250*cm; //try to match the runs from the end of e14057,e14039 campaign THIS ONE WORKS!!
-      G4double fSegazpos = -9.78*cm;  //e14057
-      // G4double fSegazpos = -10.7*cm; //e14039
+
+      //G4double fSegazpos = -9.8*cm;  //making sega sets equidistant
+      //G4double fSegazpos = -9.78*cm;  //back to e14057 specs
+      G4double fSegazpos = -10.51*cm; //e14039
 
       // G4double fSegazpos = -8.78*cm; //based on SeGA mech design
       //  G4double fSegazpos = -fsegacryolength/2. -4.455*cm;
@@ -1084,27 +1100,32 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   }
   
   //BC - create beam pipe used for LaBr3 array
-  
-  //TO Al beam pipe: 0.19375 cm thickness; 5.63675 cm outer radius
 
   //fPipeOutRad = 5.715*cm;
-  //fPipeOutRad = 5.7975*cm; //previous simulation
-  fPipeOutRad = 5.793*cm;//for pipe thickness of 0.35cm
+  fPipeOutRad = 5.7975*cm;//actual measurement- increase affects inner rad
+  //fPipeOutRad = 6.4975*cm; //
   //fPipeOutRad = 5.87375*cm;
   //fPipeOutRad = 6.0325*cm;
   //fPipeOutRad = 6.19125*cm;
   //fPipeOutRad = 6.35*cm;
-  //fPipeInRad = 5.3975*cm; //previous simulation
-  fPipeInRad = 5.443*cm;
+  fPipeInRad = 5.5975*cm;//TO previous e16032 sim (tentative final 5.02475
+  //fPipeInRad = 5.443*cm;//"actual radius obtained from measured outer radius and thickness
   fPipeLength = 50.8*cm;
   //fPipeLength = 39.6875*cm;
 
+  //TO - Additional Concentric Pipe - Unutilized
+  fPipe2OutRad = 5.0*cm;
+  fPipe2InRad = 4.935*cm;
+  fPipe2Length = 51.8*cm;
+  
+
   if(fUsePipe){
     //solidBCSpipe = new G4Tubs("BCSpipe",5.3975*cm,5.715*cm,50.8*cm/2.,0., twopi);
-    //solidBCSpipe = new G4Tubs("BCSpipe",5.3975*cm,5.87375*cm,50.8*cm/2.,0., twopi);
+    //solidBCSpipe= new G4Tubs("BCSpipe",5.3975*cm,5.87375*cm,50.8*cm/2.,0., twopi);
     // solidBCSpipe = new G4Tubs("BCSpipe",5.3975*cm,6.0325*cm,50.8*cm/2.,0., twopi);
     solidBCSpipe = new G4Tubs("BCSpipe",fPipeInRad,fPipeOutRad,fPipeLength/2.,0., twopi);
     logicBCSpipe = new G4LogicalVolume(solidBCSpipe,SegaCryoMater,"BCSpipe",0,0,0); //This is Al beam pipe!
+    //logicBCSpipe = new G4LogicalVolume(solidBCSpipe,BCSpipeMater,"BCSpipe",0,0,0); //This is not Al beam pipe!
     physiBCSpipe = new G4PVPlacement(0,
 				     G4ThreeVector(0,0,0),
 				     logicBCSpipe,
@@ -1113,6 +1134,21 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
 				     false,
 				     0,
 				     true);
+
+
+    //TO Additional Concentric Pipe - Ge
+ if(fUsePipe2){
+   solidBCSpipe2 = new G4Tubs("BCSpipe2",fPipe2InRad,fPipe2OutRad,fPipe2Length/2.,0., twopi);
+   logicBCSpipe2 = new G4LogicalVolume(solidBCSpipe2,SegaMater,"BCSpipe2",0,0,0);
+   physiBCSpipe2 = new G4PVPlacement(0,
+				     G4ThreeVector(0,0,0),
+				     logicBCSpipe2,
+				     "BCSpipe2",
+				     logicWorld,
+				     false,
+				     0,
+				     true);
+ }
     
     //Stainless Steel beam pipe:  4.25 inch outer diamter, 0.065 inch thickness (0.1651 cm)
     /*solidBCSpipe = new G4Tubs("BCSpipe",5.2324*cm,5.3975*cm,50.8*cm/2.,0., twopi);
@@ -1187,7 +1223,7 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   
     G4cout << " LaBr3 array " << G4endl;
     
-    G4int nLaBr3 = 8; //e14057
+    G4int nLaBr3 = 8; 
     G4double dtheta = twopi/nLaBr3;
     G4double theta = 0;
     
@@ -1320,7 +1356,8 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   //flabr3framelength = 11.684*cm;    //4.6 inches
   flabr3framelength = 10.95375*cm;    //4.3125 inches
   //flabr3frameinrad = 15.24*cm;      //6 inches
-  flabr3frameinrad = 15.24*cm - 0.05*cm;
+  //flabr3frameinrad = 15.24*cm;
+  flabr3frameinrad = 15.24*cm;
   flabr3frameoutrad = flabr3frameinrad + flabr3framethick;
   
   solidLaBr3Frame = new G4Tubs("LaBr3Frame",flabr3frameinrad,flabr3frameoutrad,flabr3framelength/2.,0.,twopi);
@@ -1997,7 +2034,7 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   fEJ204ScintHeight = 52*mm;
   fEJ204ScintWidth = 52*mm;
   fEJ204ScintDepth = 10*mm;
-  fEJ204ScintDepth += 4*mm;
+    fEJ204ScintDepth += 4*mm;
 
   solidEJ204Scint = new G4Box("EJ204Scint", fEJ204ScintWidth/2.0, fEJ204ScintHeight/2.0, fEJ204ScintDepth/2.0);
   logicEJ204Scint = new G4LogicalVolume(solidEJ204Scint,EJ204Scint_Mater,"EJ204Scint",0,0,0);
@@ -2030,17 +2067,22 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   innerDet_xpos = 0*mm;
   innerDet_ypos = 0*mm;
 
-  fCeBr3ScintHeight = 49*mm;
-  fCeBr3ScintWidth = 49*mm;
+  fCeBr3ScintHeight = 51*mm;
+  fCeBr3ScintWidth = 51*mm;
   fCeBr3ScintDepth = 3*mm;
   fCeBr3ScintDepth += 0*mm;
+
+  //To Using a G4ThreeVector for xyz position as a whole
+  //Fix This Timi!
+  fCeBr3ScintPos = G4ThreeVector(innerDet_xpos,innerDet_ypos,fCeBr3Scint_zpos);
 
   solidCeBr3Scint = new G4Box("CeBr3Scint", fCeBr3ScintWidth/2.0, fCeBr3ScintHeight/2.0, fCeBr3ScintDepth/2.0);
   logicCeBr3Scint = new G4LogicalVolume(solidCeBr3Scint,CeBr3Scint_Mater,"CeBr3Scint",0,0,0);
   
   //fCeBr3Scint_zpos = -2.278125*cm;
   //fCeBr3Scint_zpos = -2.02*cm;
-  fCeBr3Scint_zpos = -2.15*cm + (fCeBr3ScintDepth -3*mm)/2.0;
+  //fCeBr3Scint_zpos = -0.15*cm + (fCeBr3ScintDepth -3*mm)/2.0;
+  fCeBr3Scint_zpos = 0.4*cm + (fCeBr3ScintDepth -3*mm)/2.0;
   G4cout << "fCeBr3Scint_zpos = " << fCeBr3Scint_zpos << G4endl;
   //fCeBr3Scint_zpos += 0.02*cm;
   //fCeBr3Scint_zpos = -2.0*cm;
@@ -2048,13 +2090,14 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   if(fUseCeBr3Scint){
   
     physiCeBr3Scint = new G4PVPlacement(0,
-      G4ThreeVector(innerDet_xpos,innerDet_ypos,fCeBr3Scint_zpos), //adjacent to CeBr3Scint
-			logicCeBr3Scint,
-			"CeBr3Scint",
-      logicWorld,
-      false,
-      0,
-      true);
+					//	fCeBr3ScintPos, //TO 
+					G4ThreeVector(innerDet_xpos,innerDet_ypos,fCeBr3Scint_zpos),
+					logicCeBr3Scint,
+					"CeBr3Scint",
+					logicWorld,
+					false,
+					0,
+					true);
   
   }
 
@@ -2078,9 +2121,16 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   logicPSPMT = new G4LogicalVolume(solidPSPMT,PSPMT_Mater,"PSPMT",0,0,0);  
   
   //fPSPMT_zpos = fEJ204Scint_zpos + fEJ204ScintDepth/2.0 + fPSPMTDepth/2.0 + fPSPMTWindowDepth + fPSPMTCathodeDepth;
-  fPSPMT_zpos = fCeBr3Scint_zpos - fCeBr3ScintDepth/2.0 - fPSPMTDepth/2.0 - fPSPMTWindowDepth - fPSPMTCathodeDepth;
-  fPSPMTWindow_zpos = fPSPMT_zpos + fPSPMTDepth/2.0 + fPSPMTCathodeDepth + fPSPMTWindowDepth/2.0;
-  fPSPMTCathode_zpos = fPSPMT_zpos + fPSPMTDepth/2.0 + fPSPMTCathodeDepth/2.0;
+  //changing upstream-downstream convention to agree with e14057
+  //fPSPMT_zpos = fCeBr3Scint_zpos - fCeBr3ScintDepth/2.0 - fPSPMTDepth/2.0 - fPSPMTWindowDepth - fPSPMTCathodeDepth;
+  //fPSPMTWindow_zpos = fPSPMT_zpos + fPSPMTDepth/2.0 + fPSPMTCathodeDepth + fPSPMTWindowDepth/2.0;
+  //fPSPMTCathode_zpos = fPSPMT_zpos + fPSPMTDepth/2.0 + fPSPMTCathodeDepth/2.0;
+  
+    fPSPMT_zpos = fCeBr3Scint_zpos + fCeBr3ScintDepth/2.0 + fPSPMTDepth/2.0 + fPSPMTWindowDepth + fPSPMTCathodeDepth;
+    
+  fPSPMTWindow_zpos = fPSPMT_zpos - fPSPMTDepth/2.0 - fPSPMTCathodeDepth - fPSPMTWindowDepth/2.0;
+  fPSPMTCathode_zpos = fPSPMT_zpos - fPSPMTDepth/2.0 - fPSPMTCathodeDepth/2.0;
+  
   //making PSPMT window and cathode children of the mother volume PSPMT
   // fPSPMTWindow_zpos = -fPSPMTDepth/2.0 - fPSPMTCathodeDepth - fPSPMTWindowDepth/2.0;
   // fPSPMTCathode_zpos = -fPSPMTDepth/2.0 - fPSPMTCathodeDepth/2.0;
@@ -2286,6 +2336,8 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   logicGeThickDetector->SetVisAttributes(DetectorVisAtt);
 
   G4VisAttributes* DetectorVisAtt1 = new G4VisAttributes(G4Colour::Blue());
+  //TO - Ge Pipe vis attributes
+  //logicBCSPipe->SetVisAttributes(DetectorVisAtt1);
   //logicBCSpipe->SetVisAttributes(G4VisAttributes::Invisible);
   //logicBCSvac->SetVisAttributes(G4VisAttributes::Invisible);
   logicSegaCryo->SetVisAttributes(DetectorVisAtt1);
@@ -2353,6 +2405,8 @@ G4VPhysicalVolume* e16032_simDetectorConstruction::Construct()
   
   //BC - SiDSSD vis attributes
   logicSiDSSD -> SetVisAttributes(G4Colour::Blue());
+
+
   
 
   //------------ set the incident position ------
