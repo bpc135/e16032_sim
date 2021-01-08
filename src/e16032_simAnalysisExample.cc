@@ -279,6 +279,38 @@ void e16032_simAnalysisExample::DetectorInfo(e16032_simDetectorConstruction* myD
   e16032_siminfo->Fill();
 
 }
+//TO Create class to get information on CeBr3 from DetectorConstruction for pixelization
+void e16032_simAnalysisExample::DetectorInfo2(e16032_simDetectorConstruction* myDet2){
+  cout << "CeBr3 detector is " << myDet2->GetUseCeBr3Scint() << G4endl;
+  //CeBr3
+  UseCeBr3Scint = Int_t(myDet2->GetUseCeBr3Scint());
+  //Dimensions
+  CeBr3ScintThickness = myDet2->GetCeBr3ScintDepth();
+  CeBr3ScintHeight = myDet2->GetCeBr3ScintHeight();
+  CeBr3ScintWidth = myDet2->GetCeBr3ScintWidth();
+  //Position to define where thickness starts from
+  // CeBr3ScintThickx = myDet2->GetCeBr3ScintPos().x();
+  // CeBr3ScintThicky = myDet2->GetCeBr3ScintPos().y();
+  // CeBr3ScintThickz = myDet2->GetCeBr3ScintPos().z();
+  CeBr3Scintx = myDet2->GetCeBr3ScintPos().x();
+  CeBr3Scinty = myDet2->GetCeBr3ScintPos().y();
+  CeBr3Scintz = myDet2->GetCeBr3ScintPos().z();
+  
+  e16032_siminfo2 = (TTree *)gROOT->FindObject("e16032_siminfo2");
+  if(e16032_siminfo2);
+  else{
+    e16032_siminfo2 = new TTree("e16032_siminfo2","e16032_siminfo2 variables");
+    e16032_siminfo2->Branch("UseCeBr3Scint",&UseCeBr3Scint,"UseCeBr3Scint/I");
+    e16032_siminfo2->Branch("CeBr3ScintThickness",&CeBr3ScintThickness,"CeBr3ScintThickness/D");
+    e16032_siminfo2->Branch("CeBr3ScintHeight",&CeBr3ScintHeight,"CeBr3ScintHeight/D");
+    e16032_siminfo2->Branch("CeBr3ScintWidth",&CeBr3ScintWidth,"CeBr3ScintWidth/D");
+    e16032_siminfo2->Branch("CeBr3Scintx",&CeBr3Scintx,"CeBr3Scintx/D");
+    e16032_siminfo2->Branch("CeBr3Scinty",&CeBr3Scinty,"CeBr3Scinty/D");
+    e16032_siminfo2->Branch("CeBr3Scintz",&CeBr3Scintz,"CeBr3Scintz/D");
+  }
+  //e16032_siminfo2->Fill();
+}
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
@@ -291,6 +323,10 @@ void e16032_simAnalysisExample::BeginOfRunAction(const G4Run */*aRun*/, G4int ra
   stripwidthx = 2; //units of mm //3 mm for 60 mm diameter
   stripwidthy = 2; //untis of mm //3 mm for 60 mm diameter
   stripwidthz = (GeThickDetectorThickness/mm)/2.;
+  //TO Initialization for CeBr3 Pixelization 16x16 pixels for 51x51 mm
+  CeBr3stripwidthx = 3.1875; //units of mm
+  CeBr3stripwidthy = 3.1875; //untis of mm 
+  CeBr3stripwidthz = (CeBr3ScintThickness)/2.; //already in mm
   decaycount = 0;
   decaycount2 = 0;
   number0=0;
@@ -806,6 +842,21 @@ void e16032_simAnalysisExample::BeginOfRunAction(const G4Run */*aRun*/, G4int ra
   //     hPixelGamma = new TH2D("hPixelGamma","hPixelGamma",20,0,19,20,0,19);
   // }
 
+  //TO Looks like I need hPixelGamma for now!16x16
+  hPixelGammaCeBr3 = (TH2D *)gROOT->FindObject("hPixelGammaCeBr3");
+  if (hPixelGammaCeBr3) hPixelGammaCeBr3->Reset();
+  else{
+    hPixelGammaCeBr3 = new TH2D("hPixelGammaCeBr3","hPixelGammaCeBr3",20,0,19,20,0,19);
+    //hPixelGammaCeBr3 = new TH2D("hPixelGammaCeBr3","hPixelGammaCeBr3",16,0,50,16,0,50);
+  }
+
+  hPixelElectronCeBr3 = (TH2D *)gROOT->FindObject("hPixelElectronCeBr3");
+  if (hPixelElectronCeBr3) hPixelElectronCeBr3->Reset();
+  else{
+    hPixelElectronCeBr3 = new TH2D("hPixelElectronCeBr3","hPixelElectronCeBr3",20,0,19,20,0,19);
+    // hPixelElectronCeBr3 = new TH2D("hPixelElectronCeBr3","hPixelElectronCeBr3",16,0,50,16,0,50);
+  }
+  
   hPixele = (TH2D *)gROOT->FindObject("hPixele");
   if (hPixele) hPixele->Reset();
   else{
@@ -859,12 +910,20 @@ void e16032_simAnalysisExample::BeginOfRunAction(const G4Run */*aRun*/, G4int ra
     }
   }
   // gamma angular correlation from "experiment"
+  //TO repurposed for total energy from all segas combined
   hSega = (TH1D *)gROOT->FindObject("hSega");
   if (hSega) hSega->Reset();
   else{
     hSega = new TH1D("hSega","hSega", 12000, 0.0, 12000);
   }
 
+  //TO Sega gamma-gamma matrix
+  hSegagg = (TH2D*)gROOT->FindObject("hSegagg");
+  if (hSegagg) hSegagg->Reset();
+  else{
+    hSegagg = new TH2D("hSegagg", "hSegagg", 2500, 0, 2500, 2500, 0, 2500);
+  }
+  
   // sega addback
   hSegaab = (TH1D *)gROOT->FindObject("hSegaab");
   if (hSegaab) hSegaab->Reset();
@@ -923,15 +982,32 @@ void e16032_simAnalysisExample::BeginOfRunAction(const G4Run */*aRun*/, G4int ra
   }
 
 
-  //BC - CeBr3 Scintillator histograms
+  //TO - CeBr3 Scintillator histograms
   //just a single one for now, which represents dynode signal
+  if(hEnergyDepositCeBr3Scint) hEnergyDepositCeBr3Scint->Reset();
+  else{
+    hEnergyDepositCeBr3Scint = new TH1D("hEnergyDepositCeBr3Scint","hEnergyDepositCeBr3Scint", 12000, 0, 12000);
+  }
+
+  //TO CeBr3 Pixels
+  // for(G4int x=0; x<16; x++){
+  //   for(G4int y=0; y<16; y++){
+  //     // stringstream temptitle[x][y];
+  //     stringstream temptitle;
+  //     temptitle << "hEnergyDepositCeBr3Pixel_" << x <<"_" << y;
+  //     string title = temptitle.str();
+  //     if(hEnergyDepositCeBr3Pixel[x][y]) hEnergyDepositCeBr3Pixel[x][y]->Reset();
+  //     else {
+  // 	hEnergyDepositCeBr3Pixel[x][y] = new TH1D(title.c_str(),title.c_str(),12000,0,12000);
+  //     }
+  //   }
+  // }
+  
   hCeBr3Scint = (TH1D *)gROOT->FindObject("hCeBr3Scint");
   if (hCeBr3Scint) hCeBr3Scint->Reset();
   else{
     hCeBr3Scint = new TH1D("hCeBr3Scint","hCeBr3Scint", 3000, 0, 3000);
   }
-
-  
   
 
   for(G4int x=0;x<36;x++){
@@ -975,17 +1051,17 @@ void e16032_simAnalysisExample::BeginOfRunAction(const G4Run */*aRun*/, G4int ra
    }
   
 
-  // for(G4int x=0;x<16;x++){
-  //   for(G4int y=0;y<16;y++){
-  //    stringstream temptitle;
-  //    temptitle << "hEnergyDepositGeDSSDxy_" << x<<"_"<<y;
-  //    string title = temptitle.str();
-  //    if(hEnergyDepositGeDSSDxy[x][y]) hEnergyDepositGeDSSDxy[x][y]->Reset();
-  //    else {
-  //      hEnergyDepositGeDSSDxy[x][y] = new TH1D(title.c_str(),title.c_str(),10000,0,10000);
-  //    }
-  //   }
-  //  }
+  for(G4int x=0;x<16;x++){
+    for(G4int y=0;y<16;y++){
+     stringstream temptitle;
+     temptitle << "hEnergyDepositGeDSSDxy_" << x<<"_"<<y;
+     string title = temptitle.str();
+     if(hEnergyDepositGeDSSDxy[x][y]) hEnergyDepositGeDSSDxy[x][y]->Reset();
+     else {
+       hEnergyDepositGeDSSDxy[x][y] = new TH1D(title.c_str(),title.c_str(),10000,0,10000);
+     }
+    }
+   }
 
   // for(G4int x=0;x<16;x++){
   //     stringstream temptitle;
@@ -1182,6 +1258,9 @@ void e16032_simAnalysisExample::EndOfRunAction(const G4Run */*aRun*/, G4int rank
   file1->cd();
   gROOT->SetStyle("Pub");
   e16032_siminfo->Write();
+  //TO
+  // e16032_siminfo2->Write();
+  
 
   //e16032_simtree->SetDirectory(file1);
   e16032_simtree->Write();
@@ -1190,15 +1269,17 @@ void e16032_simAnalysisExample::EndOfRunAction(const G4Run */*aRun*/, G4int rank
   // hBeam_energy->Write();
   //hPrimaryPos->Write();
 
+
+  
   TCanvas *c1 = new TCanvas("c1","c1",1);
   c1->Divide(3,5);
   for(int i =1;i<41;i++){
     c1->cd(i);
     hEnergyDepositGeDSSDx[i-1]->GetXaxis()->SetLabelSize(0.06);
     hEnergyDepositGeDSSDx[i-1]->GetYaxis()->SetLabelSize(0.06);
-    hEnergyDepositGeDSSDx[i-1]->Draw();
+    //hEnergyDepositGeDSSDx[i-1]->Draw();
   }
-  c1->Write();
+  // c1->Write();
 
   TCanvas *c2 = new TCanvas("c2","c2",1);
   c2->Divide(2,5);
@@ -1206,13 +1287,13 @@ void e16032_simAnalysisExample::EndOfRunAction(const G4Run */*aRun*/, G4int rank
     c2->cd(i);
     hEnergyDepositClover_addback[i-1]->GetXaxis()->SetLabelSize(0.06);
     hEnergyDepositClover_addback[i-1]->GetYaxis()->SetLabelSize(0.06);
-    hEnergyDepositClover_addback[i-1]->Draw();
+    //hEnergyDepositClover_addback[i-1]->Draw();
   }
   c2->cd(10);
   hClover_addback->GetXaxis()->SetLabelSize(0.06);
   hClover_addback->GetYaxis()->SetLabelSize(0.06);
-  hClover_addback->Draw();
-  c2->Write();
+  //hClover_addback->Draw();
+  // c2->Write();
 
   file1->Write();
   file1->Close();
@@ -1403,7 +1484,6 @@ void e16032_simAnalysisExample::EndOfEventAction(const G4Event *evt)
     }
   }
 
-
   G4ThreeVector gamma1modir;
   G4ThreeVector gamma2modir;
 
@@ -1457,6 +1537,7 @@ void e16032_simAnalysisExample::EndOfEventAction(const G4Event *evt)
       G4int stripy = G4int((pos.y()/mm + (GeThickDetectorRadius/mm))/(stripwidthy)); 
                                                           //y is not offset at all
 
+     
       
       //look for implants
       if(parentID==0){
@@ -1817,6 +1898,8 @@ void e16032_simAnalysisExample::EndOfEventAction(const G4Event *evt)
     }
     
     G4double segaadd = 0;
+    //TO Quick fix.
+    numSega = 16;
     for(int x=0;x<16;x++){
       if(segaE[x] > 0){
 
@@ -1830,7 +1913,18 @@ void e16032_simAnalysisExample::EndOfEventAction(const G4Event *evt)
 	        segaE[x] = gRandom->Gaus(segaE[x],(0.022*segaE[x]/2.35));//.022
 	      }
           
-	      hEnergyDepositSega[x]->Fill(segaE[x]);
+	      hEnergyDepositSega[x]->Fill(segaE[x]); //Energy from individual Segas
+	      //TO Energy from all Segas 3/22/20
+	      hSega->Fill(segaE[x]);
+
+	      //TO 2D Histo for Sega gamma-gamma
+	      for(int y = x+1; y < numSega; y++){
+	      if(segaE[y]>0){
+		hSegagg->Fill(segaE[x], segaE[y]);
+		hSegagg->Fill(segaE[y], segaE[x]);
+	      }
+	    }
+	      
 	
 	      //Gated on 511 in sega
 	      if(/*(segaE[x] > 1510.0 && segaE[x] < 1520.0) && */SeGA_511 == true  &&  Front_1011 == false  &&    Back_1011 == false) {
@@ -2085,13 +2179,12 @@ void e16032_simAnalysisExample::EndOfEventAction(const G4Event *evt)
   }
 
 
-  //BC - hits in CeBr3 scintillator
-  if(DHCCeBr3Scint) { // TO Newly added
-    
-    int n_hit = DHCEXOtest->entries();
-    
-    //G4cout << "n_hit = " << n_hit << endl;
+  //THO - CeBr3 scintillator 
+  if(DHCCeBr3Scint) {
+    int n_hit = DHCCeBr3Scint->entries();
+    //whole volume = 1 active detector)
     G4double CeBr3ScintE = 0;
+    //G4double CeBr3ScintPix[16][16];
     
     if(n_hit > 0){
       for(int i=0; i<n_hit; i++){
@@ -2101,30 +2194,64 @@ void e16032_simAnalysisExample::EndOfEventAction(const G4Event *evt)
         G4double edep = (*DHCCeBr3Scint)[i]->GetEdep()/keV;
         G4ThreeVector pos = (*DHCCeBr3Scint)[i]->GetPostPosition();
         G4int copyno = (*DHCCeBr3Scint)[i]->GetVolCopyNo();
-  
+	G4int stepno = (*DHCCeBr3Scint)[i]->GetStepno();
+	
         CeBr3ScintE += edep;
-        
-        
+	
+	//256 pixels
+	// 	for(G4int x=0; x<16; x++){
+	// 	  for(G4int y=0; y<16; y++){
+	// 	    stepno = CeBr3stripwidthx;
+	// 	    CeBr3ScintPix[x][y] +=edep;
+	// 	  }
+	// }
+	//       G4cout << "particle - " << name << " - came from " 
+	// 	     << parentname << " " << parentenergy  
+	// 	     << " and deposited " << edep/keV << " keV at " 
+	// 	     << G4int(pos.x()/mm + 25.5) << " " << G4int(pos.y()/mm + 25.5) << G4endl;
+	//}    
+      
+	//Track hits of whatever particle you are interested in so you can plot a position map/ intensity mao over the CeBr3 volume
+	if (name == "gamma"){
+	  //G4double posx = aTrack->GetPosition().x()/mm;
+	  //G4double posx = pos.x()/mm;
+	  //G4double posy = pos.y()/mm;
+	  //hPixelGammaCeBr3->Fill(pos.x()/mm +25.5, pos.y()/mm + 25.5, edep/keV);
+	  hPixelGammaCeBr3->Fill((pos.x()/mm + 25.5)/3.1875, (pos.y()/mm + 25.5)/3.1875);//center of cebr3 is at 0,0,0 which is at half the height and width (51mm/2 each)
+	  //hPixelGammaCeBr3->Fill(pos.x()/mm + CeBr3ScintHeight/2, pos.y()/mm + CeBr3ScintWidth/2);
+	}
+	if (name == "e-"){
+	  hPixelElectronCeBr3->Fill((pos.x()/mm +25.5)/3.1875, (pos.y()/mm + 25.5)/3.1875);
+	}
+      }   
+
+      //Gaussian Smearing using info on CeBr3 resolutions at different energies
+      //Mid March 2020 Using 9.3% resolution for now (which was only tested for 122keV versus the 4% at 662keV)
+      //	if(CeBr3ScintE>=100) {
+      //  CeBr3ScintE = gRandom->Gaus(CeBr3ScintE,(0.10*CeBr3ScintE/2.35));
+      //	}
+      //	else{
+      //  CeBr3ScintE = gRandom->Gaus(CeBr3ScintE,(0.02*CeBr3ScintE/2.35));
+      //	}
+      //May 2020 - Need to determine gamma efficiency curve for cebr3; using SeGA resolution so I can fit gaussian peaks.
+      
+      if(CeBr3ScintE>300) { //SeGA res
+      	CeBr3ScintE = gRandom->Gaus(CeBr3ScintE,(0.0037*CeBr3ScintE/2.35));
+      }else if(CeBr3ScintE>=200){ //SeGA res
+      	CeBr3ScintE = gRandom->Gaus(CeBr3ScintE,(0.012*CeBr3ScintE/2.35));
+      }else if(CeBr3ScintE>=80){ //Best res for cebr3
+	CeBr3ScintE = gRandom->Gaus(CeBr3ScintE,(0.*CeBr3ScintE/2.35));
       }
-      
-      // if(CeBr3ScintE > 0){
-      
-      //   double resolution = 0.04;  //100 keV at 2.5 MeV
-      //   //double resolution = 0.0004;  //1 keV at 2.5 MeV
-      //   //double resolution = 0.004;   //10 keV at 2.5 MeV
-        
-      //   CeBr3ScintE = gRandom->Gaus(CeBr3ScintE,(resolution*CeBr3ScintE/2.355));
-        
-      // }
-      
-      //fill histogram
-      hCeBr3Scint->Fill(CeBr3ScintE);
+      else{
+      	CeBr3ScintE = gRandom->Gaus(CeBr3ScintE,(0.5*CeBr3ScintE/2.35));//.022
+      }
+      //fill energy histogram
+      hEnergyDepositCeBr3Scint->Fill(CeBr3ScintE);
     }
-
-  }
-  
   
 
+  }  
+    
   if(DHCClover){
     
     //cout << "in clover " << endl;
@@ -2469,6 +2596,7 @@ void e16032_simAnalysisExample::EndOfEventAction(const G4Event *evt)
 
 
 
+
 #endif /* defined (G4ANALYSIS_USE_ROOT) */
   
   OnceAWhileDoIt();
@@ -2488,6 +2616,8 @@ void e16032_simAnalysisExample::ClassifyNewTrack(
   if (gSystem) gSystem->ProcessEvents();
   
   G4String particleName = aTrack->GetDefinition()->GetParticleName();
+
+
   
   if (particleName == "opticalphoton")
     {
