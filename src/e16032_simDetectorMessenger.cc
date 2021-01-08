@@ -197,6 +197,12 @@ e16032_simDetectorMessenger::e16032_simDetectorMessenger(e16032_simDetectorConst
   UsePipeCmd ->SetParameterName("choice",false);
   UsePipeCmd ->AvailableForStates(G4State_PreInit);
 
+  //TO - Additional Ge pipe
+  UsePipe2Cmd = new G4UIcmdWithABool("/e16032_sim/det/UsePipe2",this);
+  UsePipe2Cmd ->SetGuidance("activate Beam Pipe2");
+  UsePipe2Cmd ->SetParameterName("choice",false);
+  UsePipe2Cmd ->AvailableForStates(G4State_PreInit);
+  
   //BC - use CeBr3 Scintillator
   UseCeBr3ScintCmd = new G4UIcmdWithABool("/e16032_sim/det/UseCeBr3Scint",this);
   UseCeBr3ScintCmd ->SetGuidance("activate CeBr3 Scintillator");
@@ -239,6 +245,7 @@ e16032_simDetectorMessenger::~e16032_simDetectorMessenger()
   delete UsePSPMTWindowCmd;
   delete UseSiDSSDCmd;
   delete UsePipeCmd;
+  delete UsePipe2Cmd;
   delete UseCeBr3ScintCmd;
   
 }
@@ -299,8 +306,10 @@ else if (command == UsePSPMTCathodeCmd )
     { myDetector->setUseSiDSSD(UseSiDSSDCmd->GetNewBoolValue(newValue));}
   else if (command == UsePipeCmd )
     { myDetector->setUsePipe(UsePipeCmd->GetNewBoolValue(newValue));}
-     else if (command == UseCeBr3ScintCmd )
-       { myDetector->setUseCeBr3Scint(UseCeBr3ScintCmd->GetNewBoolValue(newValue));}   //TO
+ else if (command == UsePipe2Cmd )
+    { myDetector->setUsePipe2(UsePipe2Cmd->GetNewBoolValue(newValue));}  
+   else if (command == UseCeBr3ScintCmd )
+    { myDetector->setUseCeBr3Scint(UseCeBr3ScintCmd->GetNewBoolValue(newValue));}
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -78,6 +78,8 @@ e16032_simMaterial::e16032_simMaterial ()
   elementNa = man->FindOrBuildElement("Na");
   elementK = man->FindOrBuildElement("K");
   elementCe = new G4Element("Cerium",   "Ce",58.,  140.42*g/mole);
+  //TO Define Lead for Beam Pipe
+  elementPb = new G4Element("Lead", "Pb",82.,  207.2*g/mole);
   
   
   // Materials
@@ -98,9 +100,13 @@ e16032_simMaterial::e16032_simMaterial ()
   Cr = new G4Material("Cr", 24., 51.9961*g/mole, 7.19*g/cm3);
   Mn = new G4Material("Mn", 25., 54.938045*g/mole, 7.21*g/cm3);
   Ni = new G4Material("Ni", 28., 58.6934*g/mole, 8.91*g/cm3);
-  Ge = new G4Material("Ge", 32., 76.61*g/mole, 5.325*g/cm3);
+  Ge = new G4Material("Ge", 32., 72.61*g/mole, 5.325*g/cm3);
   Cs = new G4Material("Cs", 55., 132.90545*g/mole, 1.93*g/cm3);
   Ir = new G4Material("Ir", 77., 192.217*g/mole, 22.65*g/cm3);
+  Pb = new G4Material("Pb", 82., 207.2*g/mole, 11.34*g/cm3);
+
+  //TO PSPMT for Downstream
+  Al2 = new G4Material("Al2", 13, 26.98153*g/mole, 3.10*g/cm3);
   
   
   He3 = new G4Material("He3", 2., 3.0160293191*g/mole, 0.0001786*g/cm3);  //0.1786 g/L, 1000cm3 in L
@@ -118,7 +124,9 @@ e16032_simMaterial::e16032_simMaterial ()
   G4double densityNIST;
   G4int ncomponents;
   G4double fractionmass;
-  StainlessSteel = new G4Material("StainlessSteel", densityNIST= 8.06*g/cm3, ncomponents=6);
+  //StainlessSteel = new G4Material("StainlessSteel", densityNIST= 8.06*g/cm3, ncomponents=6);
+  //TO 
+  StainlessSteel = new G4Material("StainlessSteel", densityNIST= 6.26*g/cm3, ncomponents=6);
   StainlessSteel->AddElement(elementC, fractionmass=0.001);
   StainlessSteel->AddElement(elementSi, fractionmass=0.007);
   StainlessSteel->AddElement(elementCr, fractionmass=0.18);
